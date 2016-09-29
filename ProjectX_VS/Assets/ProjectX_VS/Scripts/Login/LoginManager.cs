@@ -8,6 +8,9 @@ public class LoginManager : MonoBehaviour {
 	public float 			FirstPauseTime;
 	public float			PhoneRingTime;
 	public float			PhoneTalkTime;
+	public float			PowerOnTime;
+	public float			PowerOnFadeInTime;
+	public float			PowerOnFadeOutTime;
 
 	public RawImage			BlackScreen;
 	public RawImage			LoginScreen;
@@ -20,30 +23,66 @@ public class LoginManager : MonoBehaviour {
 
 	private string			m_loginState = "";
 	private string 			m_loginPassword = "ebsn3dd9kr";
+	private float			m_timer;
 
 	void Start () 
 	{
 		m_loginPassword = LoginPassword;
 		m_loginState =  "Black_Screen_No_Sound";
+		m_timer = 0.0f;
+
+		Cursor.visible = false;
 	}
 
 	void Update () 
 	{
+		m_timer += Time.deltaTime;
 		switch(m_loginState)
 		{
 		case "Black_Screen_No_Sound":
-			StartCoroutine(FirstPause(FirstPauseTime));
+			if( m_timer > FirstPauseTime )
+			{
+				m_timer = 0.0f;
+				AudioSourceUpdate( true, 0 );
+				m_loginState = "Black_Screen_Phone_Ring";
+			}
 			break;
 		case "Black_Screen_Phone_Ring":
-			StartCoroutine(FirstPause(PhoneRingTime));
+			if( m_timer > PhoneRingTime )
+			{
+				m_timer = 0.0f;
+				AudioSourceUpdate( false, 1 );
+				m_loginState = "Black_Screen_Phone_Pick_Up";
+			}
 			break;
 		case "Black_Screen_Phone_Pick_Up":
-
+			if( !AudioSource.isPlaying )
+			{
+				m_timer = 0.0f;
+				AudioSourceUpdate( false, 2 );
+				m_loginState = "PC_Start_Up";
+			}
 			break;
 		case "PC_Start_Up":
-			
+			if( m_timer > PowerOnTime )
+			{
+				m_timer = 0.0f;
+				m_loginState = "PC_Login";
+			}
+
+			if( m_timer < PowerOnFadeInTime )
+			{
+				AudioSource.volume = m_timer / PowerOnFadeInTime;
+			}
+			else if( m_timer > PowerOnTime - PowerOnFadeOutTime && m_timer < PowerOnTime )
+			{
+				AudioSource.volume = ( PowerOnTime - m_timer ) / PowerOnFadeOutTime;
+			}
 			break;
 		case "PC_Login":
+			BlackScreen.CrossFadeAlpha( 0.0f, 0.3f, false);
+			Cursor.visible = true;
+
 			if( Input.GetKey(KeyCode.Return))
 			{
 				OnReturn();
@@ -53,8 +92,6 @@ public class LoginManager : MonoBehaviour {
 			break;
 
 		}
-
-
 	}
 
 	public void OnReturn()
@@ -62,25 +99,6 @@ public class LoginManager : MonoBehaviour {
 		PasswordWrongMessage.gameObject.SetActive(false);
 
 		StartCoroutine(CheckPassword());
-	}
-
-	IEnumerator FirstPause( float time)
-	{
-		yield return new WaitForSeconds( time );
-
-		AudioSource.loop = true;
-		AudioSource.clip = AudioClipList[0];
-		AudioSource.Play();
-		m_loginState = "Black_Screen_Phone_Ring";
-	}
-
-	IEnumerator PhoneRing( float time)
-	{
-		yield return new WaitForSeconds( time );
-
-		AudioSource.clip = AudioClipList[1];
-		AudioSource.Play();
-		m_loginState = "Black_Screen_Phone_Pick_Up";
 	}
 
 	IEnumerator CheckPassword()
@@ -95,5 +113,13 @@ public class LoginManager : MonoBehaviour {
 		{
 			PasswordWrongMessage.gameObject.SetActive(true);
 		}
+	}
+
+	private void AudioSourceUpdate( bool loop, int index )
+	{
+		AudioSource.Stop();
+		AudioSource.loop = loop;
+		AudioSource.clip = AudioClipList[index];
+		AudioSource.Play();
 	}
 }

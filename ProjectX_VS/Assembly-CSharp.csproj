@@ -61,6 +61,7 @@
      <Compile Include="Assets\EasyMovieTexture\Scripts\SeekBarCtrl.cs" />
      <Compile Include="Assets\EasyMovieTexture\Scripts\SphereMirror.cs" />
      <Compile Include="Assets\EasyMovieTexture\Scripts\VideoCopyTexture.cs" />
+     <Compile Include="Assets\ProjectX_VS\Scripts\Login\LoginCompoentController.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\Login\LoginManager.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\AudioDataManager.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\AudioDataSource.cs" />

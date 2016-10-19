@@ -3,7 +3,9 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class LoginManager : MonoBehaviour {
+public class LoginManager : MonoBehaviour 
+{
+	public Texture2D		CursorOnEnterTexture;
 
 	public float 			FirstPauseTime;
 	public float			PhoneRingTime;
@@ -15,27 +17,31 @@ public class LoginManager : MonoBehaviour {
 	public RawImage			BlackScreen;
 	public RawImage			LoginScreen;
 
-	public InputField 		InputField;
+	public GameObject		LoginInObj;
+	public GameObject		ShutDownTextObj;
+	public GameObject       ShutDownButtonObj;
+
 	public string 			LoginPassword;
 	public Text		  		PasswordWrongMessage;
 	public AudioSource      AudioSource;
 	public List<AudioClip>  AudioClipList;
 
 	private string			m_loginState = "";
-	private string 			m_loginPassword = "ebsn3dd9kr";
 	private float			m_timer;
 
 	void Start () 
 	{
-		m_loginPassword = LoginPassword;
 		m_loginState =  "Black_Screen_No_Sound";
 		m_timer = 0.0f;
 
 		Cursor.visible = false;
+
+		Screen.sleepTimeout = 1;
 	}
 
 	void Update () 
 	{
+		//Debug.Log(m_loginState);
 		m_timer += Time.deltaTime;
 		switch(m_loginState)
 		{
@@ -66,6 +72,8 @@ public class LoginManager : MonoBehaviour {
 		case "PC_Start_Up":
 			if( m_timer > PowerOnTime )
 			{
+				AudioSourceUpdate( false, 3 );
+				AudioSource.Play();
 				m_timer = 0.0f;
 				m_loginState = "PC_Login";
 			}
@@ -80,38 +88,20 @@ public class LoginManager : MonoBehaviour {
 			}
 			break;
 		case "PC_Login":
+			AudioSource.volume = 1.0f;
 			BlackScreen.CrossFadeAlpha( 0.0f, 0.3f, false);
 			Cursor.visible = true;
 
-			if( Input.GetKey(KeyCode.Return))
+			m_timer += Time.deltaTime;
+			if( m_timer > 0.3f )
 			{
-				OnReturn();
+				BlackScreen.gameObject.SetActive(false);
 			}
+
 			break;
 		default:
 			break;
 
-		}
-	}
-
-	public void OnReturn()
-	{
-		PasswordWrongMessage.gameObject.SetActive(false);
-
-		StartCoroutine(CheckPassword());
-	}
-
-	IEnumerator CheckPassword()
-	{
-		yield return new WaitForSeconds( 0.2f );
-
-		if( InputField.text == m_loginPassword )
-		{ 
-			Application.LoadLevel("Scene_OS");
-		}
-		else
-		{
-			PasswordWrongMessage.gameObject.SetActive(true);
 		}
 	}
 
@@ -121,5 +111,36 @@ public class LoginManager : MonoBehaviour {
 		AudioSource.loop = loop;
 		AudioSource.clip = AudioClipList[index];
 		AudioSource.Play();
+	}
+
+	public void ShutDownButtonPointerEnter( Text text )
+	{
+		Cursor.SetCursor( CursorOnEnterTexture, new Vector2( 10, 8 ), CursorMode.Auto);
+	}
+
+	public void ShutDownButtonPointerExit( Text text )
+	{
+		Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+	}
+
+	public void ShutDownSystem()
+	{
+		ShutDownButtonObj.GetComponent<Button>().interactable = false;
+		AudioSource.volume = 1.0f;
+		AudioSourceUpdate( false, 4 );
+		StartCoroutine( LoginInObjFadeOut() );
+	}
+
+	IEnumerator LoginInObjFadeOut()
+	{
+		CanvasGroup loginIn = LoginInObj.GetComponent<CanvasGroup>(); 
+		while(loginIn.alpha > 0)
+		{                   
+			loginIn.alpha -= Time.deltaTime/0.1f;   
+			yield return null;
+		}
+		ShutDownTextObj.SetActive(true);
+		yield return new WaitForSeconds( 5.0f );
+		Application.Quit();
 	}
 }

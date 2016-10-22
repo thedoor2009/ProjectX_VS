@@ -226,7 +226,7 @@ extern "C" void VideoPlayerPluginLoadVideo(int iID,const char *videoURL) {
     
     _GetPlayer(iID)->m_videoURL = _GetUrl(videoURL);
 
-    [_GetPlayer(iID) loadVideo:_GetUrl(videoURL)];
+    [_GetPlayer(iID) loadVideo:_GetPlayer(iID)->m_videoURL];
     
 }
 
@@ -307,6 +307,14 @@ extern "C" void VideoPlayerPluginExtents(int iID,int *w, int *h) {
     CGSize sz = [_GetPlayer(iID)->player videoSize];
     *w = (int) sz.width;
     *h = (int) sz.height;
+    
+    
+    if(sz.width == 0)
+    {
+        [_GetPlayer(iID)->player curFrameTexture];
+    }
+    
+    
 }
 
 

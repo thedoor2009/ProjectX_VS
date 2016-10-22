@@ -42,9 +42,8 @@ public class MediaPlayerCtrl : MonoBehaviour
     public delegate void VideoReady();
     public delegate void VideoError(MEDIAPLAYER_ERROR errorCode, MEDIAPLAYER_ERROR errorCodeExtra);
     public delegate void VideoFirstFrameReady();
-	public delegate void VideoFirstFramePlaying();
 	public delegate void VideoResize ();
-
+	public delegate void VideoFirstFramePlaying();
 
 	public VideoResize OnResize;
     public VideoReady OnReady;
@@ -54,6 +53,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 	public VideoFirstFramePlaying OnVideoFirstFramePlaying;
 
 	private IntPtr m_texPtr;
+
 
 #if UNITY_IPHONE || UNITY_TVOS
 	
@@ -68,7 +68,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 	[DllImport ("BlueDoveMediaRender")]
 	private static extern void InitNDK();
 
-#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+#if UNITY_5_2 
 	[DllImport ("BlueDoveMediaRender")]
 	private static extern IntPtr EasyMovieTextureRender();
 #endif
@@ -76,35 +76,40 @@ public class MediaPlayerCtrl : MonoBehaviour
 
 
 #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
+
 	[DllImport ("EasyMovieTexture")]
-    private static extern void SetTextureFromUnity(System.IntPtr texture, int w, int h,byte[] data);
+	private static extern int SetTexture();
+
+	[DllImport ("EasyMovieTexture")]
+	private static extern void ReleaseTexture(int iID);
+
+	[DllImport ("EasyMovieTexture")]
+    private static extern void SetTextureFromUnity(int iID,System.IntPtr texture, int w, int h,byte[] data);
 	
 	
 	[DllImport("EasyMovieTexture")]
 	private static extern IntPtr GetRenderEventFunc();
 	
-	private delegate void DebugCallback(string message);
+
 	
-	[DllImport("EasyMovieTexture")]
-	private static extern void RegisterDebugCallback(DebugCallback callback);	
-	
-#else
+#endif
 
-	#if (UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX)
-		[DllImport ("EasyMovieTextureRender")]
-		private static extern void SetTextureFromUnity(System.IntPtr texture, int w, int h,byte[] data);
+#if (UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX)
+	[DllImport ("EasyMovieTextureRender")]
+	private static extern int SetTexture();
 
+	[DllImport ("EasyMovieTextureRender")]
+	private static extern void ReleaseTexture(int iID);
 
-		[DllImport("EasyMovieTextureRender")]
-		private static extern IntPtr GetRenderEventFunc();
+	[DllImport ("EasyMovieTextureRender")]
+	private static extern void SetTextureFromUnity(int iID,System.IntPtr texture, int w, int h,byte[] data);
 
-		private delegate void DebugCallback(string message);
+	[DllImport("EasyMovieTextureRender")]
+	private static extern IntPtr GetRenderEventFunc();
 
-		[DllImport("EasyMovieTextureRender")]
-		private static extern void RegisterDebugCallback(DebugCallback callback);
-	#endif
 
 #endif
+
 
 
 
@@ -247,6 +252,24 @@ public class MediaPlayerCtrl : MonoBehaviour
 		
 #endif
 
+	#if UNITY_STANDALONE || UNITY_EDITOR
+		//RegisterDebugCallback(new DebugCallback(DebugMethod));
+		//threadVideo = new Thread(ThreadUpdate);
+		//threadVideo.Start();
+	#endif
+
+	#if UNITY_ANDROID && !UNITY_EDITOR
+
+	#if UNITY_5
+	if( SystemInfo.graphicsMultiThreaded == true)
+	InitNDK();
+	#endif
+		m_iAndroidMgrID = Call_InitNDK();
+	#endif
+
+		Call_SetUnityActivity();
+
+
 
 
 
@@ -256,22 +279,6 @@ public class MediaPlayerCtrl : MonoBehaviour
     void Start()
     {
 
-#if UNITY_STANDALONE || UNITY_EDITOR
-			//RegisterDebugCallback(new DebugCallback(DebugMethod));
-        //threadVideo = new Thread(ThreadUpdate);
-        //threadVideo.Start();
-#endif
-
-#if UNITY_ANDROID && !UNITY_EDITOR
-		
-#if UNITY_5
-		if( SystemInfo.graphicsMultiThreaded == true)
-			InitNDK();
-#endif
-		m_iAndroidMgrID = Call_InitNDK();
-#endif
-
-        Call_SetUnityActivity();
 
 
 
@@ -429,8 +436,10 @@ public class MediaPlayerCtrl : MonoBehaviour
 
 				m_texPtr = m_VideoTexture.GetNativeTexturePtr ();
 
+			
+
 	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
-				Call_SetUnityTexture((int)m_VideoTexture.GetNativeTexturePtr());
+				Call_SetUnityTexture((int)m_texPtr);
 #else
 				Call_SetUnityTexture (m_VideoTexture.GetNativeTextureID ());
 #endif
@@ -541,7 +550,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 		m_texPtr = m_VideoTexture.GetNativeTexturePtr ();
 
 	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
-	Call_SetUnityTexture((int)m_VideoTexture.GetNativeTexturePtr());
+		Call_SetUnityTexture((int)m_texPtr);
 	#else
 		Call_SetUnityTexture (m_VideoTexture.GetNativeTextureID ());
 	#endif
@@ -1009,7 +1018,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 #if UNITY_5
 		if( SystemInfo.graphicsMultiThreaded == true)
 		{
-	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+	#if UNITY_5_2 
 			GL.IssuePluginEvent(EasyMovieTextureRender(), 5 + m_iAndroidMgrID * 10 + 7000);
 #else
 			GL.IssuePluginEvent(5 + m_iAndroidMgrID * 10 + 7000);
@@ -1035,7 +1044,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 		{
 
 
-	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+	#if UNITY_5_2 
 			GL.IssuePluginEvent(EasyMovieTextureRender(), 4 + m_iAndroidMgrID * 10 + 7000);
 #else
 			GL.IssuePluginEvent(4 + m_iAndroidMgrID * 10 + 7000);
@@ -1059,7 +1068,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 		{
 			GetJavaObject().Call("NDK_SetFileName", strFileName);
 
-	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+	#if UNITY_5_2 
 			GL.IssuePluginEvent(EasyMovieTextureRender(), 1 + m_iAndroidMgrID * 10 + 7000);
 #else
 			GL.IssuePluginEvent(1+ m_iAndroidMgrID * 10 + 7000);
@@ -1141,7 +1150,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 #if UNITY_5
 		if( SystemInfo.graphicsMultiThreaded == true)
 		{
-	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+	#if UNITY_5_2 
 			GL.IssuePluginEvent(EasyMovieTextureRender(), 3 + m_iAndroidMgrID * 10 + 7000);
 #else
 			GL.IssuePluginEvent(3+ m_iAndroidMgrID * 10 + 7000);
@@ -1241,7 +1250,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 		{
 
 
-	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+	#if UNITY_5_2 
 			GL.IssuePluginEvent(EasyMovieTextureRender(), 2 + m_iAndroidMgrID * 10 + 7000);
 #else
 			GL.IssuePluginEvent(2+ m_iAndroidMgrID * 10 + 7000);
@@ -1302,7 +1311,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 #if UNITY_5
 		if( SystemInfo.graphicsMultiThreaded == true)
 		{
-	#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
+	#if UNITY_5_2 
 			GL.IssuePluginEvent(EasyMovieTextureRender(), 0 + m_iAndroidMgrID * 10 + 7000);
 #else
 			GL.IssuePluginEvent(0+ m_iAndroidMgrID * 10 + 7000);
@@ -1655,20 +1664,9 @@ public class MediaPlayerCtrl : MonoBehaviour
 		if( m_CurrentState == MEDIAPLAYER_STATE.STOPPED)
 			m_CurrentState = MEDIAPLAYER_STATE.PLAYING;
 		
-		StartCoroutine(GetFirstFrameReady());
+		
 	}
-
-	IEnumerator GetFirstFrameReady()
-	{
-		yield return new WaitForSeconds( 0.2f );
-
-		if(OnVideoFirstFramePlaying != null )
-		{
-		OnVideoFirstFramePlaying();
-		OnVideoFirstFramePlaying = null;
-		}
-	}
-
+	
 	private void Call_Reset()
 	{
 		
@@ -1807,7 +1805,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 	bool bVideoFirstFrameReady = false;
 
 	
-
+	int m_iID;
 	
 	private void Call_Destroy()
 	{
@@ -1831,6 +1829,8 @@ public class MediaPlayerCtrl : MonoBehaviour
         }
 
 		ffmpeg.avformat_network_deinit ();
+
+		ReleaseTexture (m_iID);
 	}
 	
 	private void Call_UnLoad()
@@ -1978,6 +1978,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 		iSoundCount = 0;
 		iInitCount= 0;
 		bSeekTo = true;
+		bEnd = false;
 
 		if (audioSource != null) {
 			audioSource.Stop();
@@ -2033,7 +2034,7 @@ public class MediaPlayerCtrl : MonoBehaviour
 	});
 
 	loader.Priority = System.Threading.ThreadPriority.AboveNormal;
-
+	loader.IsBackground = true;
 	loader.Start ();
 
 	return true;
@@ -2184,6 +2185,7 @@ void LoadVideoPart2 ()
 		bVideoFirstFrameReady = false;
 
         threadVideo = new Thread(ThreadUpdate);
+		threadVideo.IsBackground = true;
         threadVideo.Start();
 
 		if (m_bAutoPlay == true) 
@@ -2297,6 +2299,7 @@ void LoadVideoPart2 ()
 
    
             UpdateVideo();
+			Thread.Sleep(1);
       
            
         
@@ -2344,7 +2347,7 @@ void LoadVideoPart2 ()
 
 						if (gotPicture == 1) {
 							if (pts > 0) {
-                                if (listVideo.Count > 19)
+                                if (listVideo.Count > 5)
                                 {
                                     if (!m_bIsFirstFrameReady) {
 
@@ -2790,6 +2793,7 @@ void LoadVideoPart2 ()
 		if (threadVideo == null && m_CurrentState != MEDIAPLAYER_STATE.END && m_CurrentState != MEDIAPLAYER_STATE.NOT_READY)
         {
             threadVideo = new Thread(ThreadUpdate);
+			threadVideo.IsBackground = true;
             threadVideo.Start();
         }
 
@@ -2889,9 +2893,8 @@ void LoadVideoPart2 ()
           
             if( listVideo.Count > 0)
             {
-				
-				SetTextureFromUnity (m_VideoTexture.GetNativeTexturePtr (), m_iWidth, m_iHeight, listVideo.Dequeue());
-                GL.IssuePluginEvent (GetRenderEventFunc (), 7000);
+				SetTextureFromUnity (m_iID,m_texPtr, m_iWidth, m_iHeight, listVideo.Dequeue());
+				GL.IssuePluginEvent (GetRenderEventFunc (), 7000 + m_iID);
 
 
             }
@@ -3210,9 +3213,19 @@ void LoadVideoPart2 ()
 			}
 			m_CurrentState = MEDIAPLAYER_STATE.PLAYING;
 		}
-		
+		StartCoroutine(GetFirstFrameReady());
 	}
 	
+	IEnumerator GetFirstFrameReady()
+	{
+		yield return new WaitForSeconds( 0.2f );
+
+		if(OnVideoFirstFramePlaying != null )
+		{
+			OnVideoFirstFramePlaying();
+			OnVideoFirstFramePlaying = null;
+		}
+	}
 	private void Call_Reset()
 	{
 		
@@ -3289,6 +3302,11 @@ void LoadVideoPart2 ()
 		ffmpeg.av_register_all();
 		ffmpeg.avcodec_register_all();
 		ffmpeg.avformat_network_init();
+
+		m_iID = SetTexture ();
+
+
+		
 	}
 	
 	private int Call_GetError()

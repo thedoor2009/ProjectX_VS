@@ -50,6 +50,7 @@ static void* _ObservePlayerItemContext = (void*)0x2;
     AVPlayerItemVideoOutput*    videoOutput;
 
     CMSampleBufferRef           _cmSampleBuffer;
+    CMSampleBufferRef           _cmSampleBuffer2;
     CMVideoSampling             _videoSampling;
     
     unsigned int _videoTexture;
@@ -113,6 +114,12 @@ static void* _ObservePlayerItemContext = (void*)0x2;
     {
         CFRelease(_cmSampleBuffer);
         _cmSampleBuffer = 0;
+    }
+    
+    if(_cmSampleBuffer2)
+    {
+        CFRelease(_cmSampleBuffer2);
+        _cmSampleBuffer2 = 0;
     }
     CMVideoSampling_Uninitialize(&_videoSampling);
 }
@@ -270,7 +277,7 @@ static void* _ObservePlayerItemContext = (void*)0x2;
         size_t h = CVPixelBufferGetHeight( pixelBuffer);
       
         CGSize size = CGSizeMake(w, h);
-        
+       
         if( _videoSize.width != size.width)
         {
             _videoSize = size;
@@ -378,8 +385,10 @@ static void* _ObservePlayerItemContext = (void*)0x2;
     _curTime = time;
     while(_reader.status == AVAssetReaderStatusReading && CMTimeCompare(_curFrameTimestamp, _curTime) <= 0)
     {
-        if(_cmSampleBuffer)
-            CFRelease(_cmSampleBuffer);
+        if(_cmSampleBuffer2)
+            CFRelease(_cmSampleBuffer2);
+        
+        _cmSampleBuffer2 = _cmSampleBuffer;
 
         // TODO: properly handle ending
     

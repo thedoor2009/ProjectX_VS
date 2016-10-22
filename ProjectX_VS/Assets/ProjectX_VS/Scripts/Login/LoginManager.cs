@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class LoginManager : MonoBehaviour 
 {
+	public MovieController  Movie;
 	public Texture2D		CursorOnEnterTexture;
 
 	public float 			FirstPauseTime;
@@ -16,6 +17,7 @@ public class LoginManager : MonoBehaviour
 
 	public RawImage			BlackScreen;
 	public RawImage			LoginScreen;
+	public RawImage			MovieScreen;
 
 	public GameObject		LoginInObj;
 	public GameObject		ShutDownTextObj;
@@ -36,12 +38,14 @@ public class LoginManager : MonoBehaviour
 
 		Cursor.visible = false;
 
-		Screen.sleepTimeout = 1;
+		if( AudioClipList.Count == 0 )
+		{
+			AudioClipList = this.GetComponent<AudioFilesReader>().AudioClipList;
+		}
 	}
 
 	void Update () 
 	{
-		//Debug.Log(m_loginState);
 		m_timer += Time.deltaTime;
 		switch(m_loginState)
 		{
@@ -67,15 +71,24 @@ public class LoginManager : MonoBehaviour
 				m_timer = 0.0f;
 				AudioSourceUpdate( false, 2 );
 				m_loginState = "PC_Start_Up";
+				Movie.PlayMovie();
 			}
 			break;
 		case "PC_Start_Up":
+
+			if( MovieScreen.IsActive() )
+			{
+				MovieScreen.texture = Movie.ControllerMaterial.mainTexture;
+			}
+				
 			if( m_timer > PowerOnTime )
 			{
 				AudioSourceUpdate( false, 3 );
 				AudioSource.Play();
 				m_timer = 0.0f;
 				m_loginState = "PC_Login";
+
+				MovieScreen.gameObject.SetActive(false);
 			}
 
 			if( m_timer < PowerOnFadeInTime )
@@ -85,6 +98,13 @@ public class LoginManager : MonoBehaviour
 			else if( m_timer > PowerOnTime - PowerOnFadeOutTime && m_timer < PowerOnTime )
 			{
 				AudioSource.volume = ( PowerOnTime - m_timer ) / PowerOnFadeOutTime;
+			}
+			else
+			{
+				if( !MovieScreen.IsActive() )
+				{
+					MovieScreen.gameObject.SetActive(true);
+				}
 			}
 			break;
 		case "PC_Login":

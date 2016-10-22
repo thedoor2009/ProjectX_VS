@@ -29,6 +29,9 @@ public class LoginCompoentController : MonoBehaviour {
 		int year = System.DateTime.Now.Year;
 		loginPassword = year.ToString() + month.ToString() + day.ToString();
 
+		audioSource.clip = this.GetComponent<AudioFilesReader>().AudioClipList[0];
+		hintAudioSource.clip = this.GetComponent<AudioFilesReader>().AudioClipList[1];
+
 		Debug.Log(loginPassword);
 	}
 

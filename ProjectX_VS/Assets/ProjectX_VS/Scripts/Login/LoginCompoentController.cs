@@ -86,7 +86,7 @@ public class LoginCompoentController : MonoBehaviour {
 
 		if( inputField.text == loginPassword )
 		{ 
-			//Application.LoadLevel("Scene_OS");
+			Application.LoadLevel("Scene_2");
 		}
 		else
 		{

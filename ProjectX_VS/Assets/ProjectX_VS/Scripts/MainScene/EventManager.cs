@@ -8,9 +8,13 @@ public class EventManager : MonoBehaviour {
 	#region Data Memeber
 	public UIMananger UIManager;
 
-	public EventTriggerNotebook 	NotebookTrigger;
-	public EventTriggerSkype 		SkypeTrigger;
-	public EventTriggerMovie 		MovieTrigger;
+	public EventTriggerNotebook 		NotebookTrigger;
+	public EventTriggerSkype 			SkypeTrigger;
+	public EventTriggerNotification 	NotificationTrigger;
+	public EventTriggerMovie 			MovieTrigger;
+
+	public AudioSource					AudioSource;
+	public List<AudioClip>				AudioClipList;
 
 	private Dictionary <string, UnityEvent> eventDictionary;
 
@@ -87,13 +91,18 @@ public class EventManager : MonoBehaviour {
 	#region Hook
 	void Start()
 	{
-
+		if( AudioClipList.Count == 0 )
+		{
+			AudioClipList = this.GetComponent<AudioFilesReader>().AudioClipList;
+		}
+		AudioSource.PlayOneShot( AudioClipList[0]);
 	}
 
 	void OnEableListening()
 	{
 		EventManager.StartListening ("notebookFinishReading", EventTriggerNotebookFinishReading);
 		EventManager.StartListening ("skypeFinishAnswering", EventTriggerSkypeFinishCalling);
+		EventManager.StartListening ("notificationFinishClick", EventTriggerNotificationClick);
 	}
 
 	void Update()
@@ -111,6 +120,18 @@ public class EventManager : MonoBehaviour {
 	}
 
 	void EventTriggerSkypeFinishCalling()
+	{
+		StartCoroutine(SetUpNofitication());
+	}
+
+	IEnumerator SetUpNofitication()
+	{
+		yield return new WaitForSeconds( 2.0f );
+		NotificationTrigger.gameObject.SetActive(true);
+		AudioSource.PlayOneShot( AudioClipList[1]);
+	}
+
+	void EventTriggerNotificationClick()
 	{
 		//UIManager.MovieIcon.gameObject.SetActive(true);
 	}

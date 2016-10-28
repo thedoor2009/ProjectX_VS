@@ -73,7 +73,6 @@
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\EventTriggerNotebook.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\EventTriggerNotification.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\EventTriggerSkype.cs" />
-     <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\LoadingVFX.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\Movie\ElevatorMovieLogicManager.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\Movie\EntranceMovieLogicManager.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\Movie\HallMovieLogicManager.cs" />
@@ -81,6 +80,8 @@
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\Movie\MovieLogicManager.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\Movie\MoviesManager.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\MovieController.cs" />
+     <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\UI\LoadingVFX.cs" />
+     <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\UI\LoginLoadingVFX.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\UI\NoteController.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\UI\NotificationController.cs" />
      <Compile Include="Assets\ProjectX_VS\Scripts\MainScene\UI\UIController.cs" />

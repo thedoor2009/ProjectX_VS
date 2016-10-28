@@ -5,6 +5,8 @@ using System.Collections;
 public class LoginCompoentController : MonoBehaviour {
 
 	public GameObject UserButton;
+	public GameObject UserAvator;
+	public GameObject LoginLoadingVFX;
 	public Texture2D		CursorOnEnterTexture;
 
 	public RectTransform Frame;
@@ -80,16 +82,21 @@ public class LoginCompoentController : MonoBehaviour {
 	IEnumerator CheckPassword()
 	{
 		PasswordWrongMessage.gameObject.SetActive(false);
-		audioSource.Play();
 
-		yield return new WaitForSeconds( 0.2f );
+
+		LoginLoadingVFX.SetActive(true);
+		InputField.gameObject.SetActive(false);
+		UserButton.SetActive(false);
+		UserAvator.SetActive(false);
 
 		if( inputField.text == loginPassword )
 		{ 
+			yield return new WaitForSeconds( 2.0f );
 			Application.LoadLevel("Scene_2");
 		}
 		else
 		{
+			audioSource.Play();
 			PasswordWrongMessage.gameObject.SetActive(true);
 		}
 	}

@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
 public class LoginLoadingVFX : MonoBehaviour
 {
 	public List<GameObject> loadingCubeList;
-	public float LoadingTime = 2.0f;
+	public Text 	LoadingDescText;
+	public float 	LoadingTime = 2.0f;
+	public bool  	IsLoadingFinished = false;
 
 	private float m_timer;
 	private float m_loadingGapTime = 0.0f;
@@ -16,7 +19,7 @@ public class LoginLoadingVFX : MonoBehaviour
 		{
 			return;
 		}
-
+		IsLoadingFinished = false;
 		m_loadingGapTime = LoadingTime / loadingCubeList.Count;
 	}
 
@@ -24,6 +27,9 @@ public class LoginLoadingVFX : MonoBehaviour
 	{
 		if( m_index >= loadingCubeList.Count )
 		{
+			IsLoadingFinished = true;
+			Close();
+
 			return;
 		}
 
@@ -32,6 +38,16 @@ public class LoginLoadingVFX : MonoBehaviour
 		{
 			m_timer = 0.0f;
 			loadingCubeList[m_index++].SetActive(true);
+		}
+	}
+
+	void Close()
+	{
+		LoadingDescText.gameObject.SetActive(false);
+		this.GetComponent<RawImage>().enabled = false;
+		foreach( GameObject loadingCube in loadingCubeList )
+		{
+			loadingCube.SetActive(false);
 		}
 	}
 }

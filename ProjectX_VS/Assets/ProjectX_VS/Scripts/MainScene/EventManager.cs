@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class EventManager : MonoBehaviour {
 
 	#region Data Memeber
-	public UIMananger UIManager;
 
 	public EventTriggerNotebook 		NotebookTrigger;
 	public EventTriggerSkype 			SkypeTrigger;
@@ -116,7 +115,7 @@ public class EventManager : MonoBehaviour {
 	void EventTriggerNotebookFinishReading()
 	{
 		SkypeTrigger.SetPhoneCall();
-		UIManager.UpdateAppUIDepth(SkypeTrigger.gameObject.transform);
+		UIMananger.instance.UpdateAppUIDepth(SkypeTrigger.gameObject.transform);
 	}
 
 	void EventTriggerSkypeFinishCalling()
@@ -133,7 +132,8 @@ public class EventManager : MonoBehaviour {
 
 	void EventTriggerNotificationClick()
 	{
-		//UIManager.MovieIcon.gameObject.SetActive(true);
+		NotificationTrigger.NotificationFinishEvent();
+		UIMananger.instance.UpdateAppUIDepth(NotificationTrigger.gameObject.transform);
 	}
 	#endregion
 }

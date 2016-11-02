@@ -3,6 +3,8 @@ using System.Collections;
 
 public class EventTriggerNotification : EventTrigger 
 {
+	public GameObject InstalledApp;
+	public LoginLoadingVFX LoadingVFX;
 
 	void Start ()
 	{
@@ -11,11 +13,16 @@ public class EventTriggerNotification : EventTrigger
 
 	void Update ()
 	{
-	
+		if( LoadingVFX.IsLoadingFinished )
+		{
+			InstalledApp.SetActive(true);
+			this.gameObject.SetActive(false);
+		}
 	}
 
-	void NotificationFinishEvent()
+	public void NotificationFinishEvent()
 	{
-		
+		LoadingVFX.gameObject.SetActive(true);
+		UIMananger.instance.UpdateAppUIDepth(LoadingVFX.gameObject.transform);
 	}
 }

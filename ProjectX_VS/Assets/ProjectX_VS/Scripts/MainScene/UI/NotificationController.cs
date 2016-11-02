@@ -79,8 +79,6 @@ public class NotificationController : UIController
 	public override void OnClickEvent()
 	{
 		//TODO
-		this.GetComponent<Image>().enabled = false;
-		this.GetComponent<Button>().interactable = false;
-		this.GetComponentInChildren<Text>().gameObject.SetActive(false);
+		EventManager.TriggerEvent ("notificationFinishClick");
 	}
 }

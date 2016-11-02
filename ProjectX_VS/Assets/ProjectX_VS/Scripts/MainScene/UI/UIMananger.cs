@@ -6,6 +6,26 @@ public class UIMananger : MonoBehaviour
 {
 	public List<GameObject> UIControllerList;
 
+	private static UIMananger uiManager;
+
+	public static UIMananger instance
+	{
+		get
+		{
+			if (!uiManager)
+			{
+				uiManager = FindObjectOfType (typeof (UIMananger)) as UIMananger;
+
+				if (!uiManager)
+				{
+					Debug.LogError ("There needs to be one active EventManger script on a GameObject in your scene.");
+				}
+			}
+
+			return uiManager;
+		}
+	}
+
 	void Start ()
 	{
 	

@@ -61,6 +61,7 @@ public class UIIconController : UIController {
 			return;
 		}
 		ReferUIApp.SetActive(true);
+		UIMananger.instance.UpdateAppUIDepth( ReferUIApp.gameObject.transform );
 	}
 
 	public override void SingleClickEvent()
